@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard · Northern Flow</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="nav-scrim" id="navScrim"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><img src="logo.png" alt="Northern Flow" onerror="this.remove(); this.parentElement.textContent='NF';" /></div>
+      <div class="name">Northern Flow</div>
+      <div class="tagline">Inventory &amp; Sales</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html" data-nav="dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="inventory.html" data-nav="inventory">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        Inventory
+      </a>
+      <a href="sales.html" data-nav="sales">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.58 9.59a2 2 0 002.83 0l4.59-4.59a2 2 0 000-2.83z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+        Sales
+      </a>
+      <a href="report.html" data-nav="report">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+        Report
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <button data-logout type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log Out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="flex gap-12" style="align-items:center;">
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub" id="todayLabel">Today's overview</div>
+        </div>
+      </div>
+      <span class="eyebrow hide-mobile">Northern Flow Classic Tee</span>
+    </header>
+
+    <div class="content">
+
+      <div class="low-stock-banner" id="lowStockBanner" style="display:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:1px; color:var(--warning);"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <strong>Low stock warning</strong>
+          <span id="lowStockText" class="text-muted"></span>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="tag-grid">
+        <div class="tag-card">
+          <div class="tag-label">Total Stock Available</div>
+          <div class="tag-value" id="statTotalStock">–</div>
+        </div>
+        <div class="tag-card">
+          <div class="tag-label">Sales Today</div>
+          <div class="tag-value" id="statSalesToday">–</div>
+        </div>
+        <div class="tag-card">
+          <div class="tag-label">Sales This Month</div>
+          <div class="tag-value" id="statSalesMonth">–</div>
+        </div>
+        <div class="tag-card">
+          <div class="tag-label">Total Revenue</div>
+          <div class="tag-value accent" id="statRevenue">–</div>
+        </div>
+        <div class="tag-card">
+          <div class="tag-label">Estimated Profit</div>
+          <div class="tag-value success" id="statProfit">–</div>
+        </div>
+        <div class="tag-card">
+          <div class="tag-label">Remaining Inventory</div>
+          <div class="tag-value" id="statRemaining">–</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-2col">
+        <div class="panel chart-card">
+          <div class="panel-head">
+            <h2>Daily Sales — Last 14 Days</h2>
+          </div>
+          <div class="panel-body">
+            <canvas id="dailyChart" height="120"></canvas>
+          </div>
+        </div>
+        <div class="panel chart-card">
+          <div class="panel-head">
+            <h2>Monthly Sales — Last 6 Months</h2>
+          </div>
+          <div class="panel-body">
+            <canvas id="monthlyChart" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick info -->
+      <div class="grid-2col">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Stock by Size</h2>
+          </div>
+          <div class="panel-body">
+            <div class="mini-list" id="stockBySize">
+              <div class="mini-list-item"><span class="text-muted">Loading…</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Recent Sales</h2>
+            <a href="sales.html" class="btn btn-outline btn-sm">View All</a>
+          </div>
+          <div class="panel-body">
+            <div class="mini-list" id="recentSales">
+              <div class="mini-list-item"><span class="text-muted">Loading…</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" data-nav="dashboard">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Home
+    </a>
+    <a href="inventory.html" data-nav="inventory">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+      Stock
+    </a>
+    <a href="sales.html" data-nav="sales">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.58 9.59a2 2 0 002.83 0l4.59-4.59a2 2 0 000-2.83z"/></svg>
+      Sales
+    </a>
+    <a href="report.html" data-nav="report">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+      Report
+    </a>
+  </div>
+</nav>
+
+<script type="module">
+  import { guardAuth, initNav, formatCurrency, formatDate, todayStr, isSameMonth, statusFor } from "./app.js";
+  import { watchProduct, watchSales, SIZES, LOW_STOCK_THRESHOLD } from "./firebase.js";
+
+  await guardAuth();
+  initNav("dashboard");
+
+  document.getElementById("todayLabel").textContent = new Date().toLocaleDateString("en-MY", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric"
+  });
+
+  let product = null;
+  let sales = [];
+  let dailyChart, monthlyChart;
+
+  function renderStockBySize() {
+    const el = document.getElementById("stockBySize");
+    const banner = document.getElementById("lowStockBanner");
+    const bannerText = document.getElementById("lowStockText");
+    if (!product) { el.innerHTML = `<div class="mini-list-item"><span class="text-muted">No product data yet.</span></div>`; return; }
+
+    const lowSizes = [];
+    el.innerHTML = SIZES.map((size) => {
+      const s = product.sizes?.[size] || { stock: 0, sold: 0 };
+      const status = statusFor(s.stock);
+      if (s.stock <= LOW_STOCK_THRESHOLD) lowSizes.push(size);
+      return `<div class="mini-list-item">
+        <span><strong>${size}</strong></span>
+        <span class="status ${status.cls}">${status.label}</span>
+        <span class="meta">${s.stock} in stock</span>
+      </div>`;
+    }).join("");
+
+    if (lowSizes.length) {
+      banner.style.display = "flex";
+      bannerText.textContent = `Size${lowSizes.length > 1 ? "s" : ""} ${lowSizes.join(", ")} ${lowSizes.length > 1 ? "are" : "is"} running low. Restock soon from the Inventory page.`;
+    } else {
+      banner.style.display = "none";
+    }
+  }
+
+  function renderStats() {
+    if (!product) return;
+    const sizes = SIZES.map((s) => product.sizes?.[s] || { stock: 0, sold: 0 });
+    const totalStock = sizes.reduce((sum, s) => sum + (s.stock || 0), 0);
+    const totalSold = sizes.reduce((sum, s) => sum + (s.sold || 0), 0);
+
+    const today = todayStr();
+    const salesToday = sales.filter((s) => s.date === today);
+    const salesThisMonth = sales.filter((s) => isSameMonth(s.date));
+
+    const qtyToday = salesToday.reduce((sum, s) => sum + s.quantity, 0);
+    const qtyMonth = salesThisMonth.reduce((sum, s) => sum + s.quantity, 0);
+    const totalRevenue = sales.reduce((sum, s) => sum + s.revenue, 0);
+    const totalProfit = sales.reduce((sum, s) => sum + s.profit, 0);
+
+    document.getElementById("statTotalStock").textContent = totalStock;
+    document.getElementById("statSalesToday").textContent = qtyToday + " pcs";
+    document.getElementById("statSalesMonth").textContent = qtyMonth + " pcs";
+    document.getElementById("statRevenue").textContent = formatCurrency(totalRevenue);
+    document.getElementById("statProfit").textContent = formatCurrency(totalProfit);
+    document.getElementById("statRemaining").textContent = totalStock;
+  }
+
+  function renderRecentSales() {
+    const el = document.getElementById("recentSales");
+    if (!sales.length) {
+      el.innerHTML = `<div class="mini-list-item"><span class="text-muted">No sales recorded yet.</span></div>`;
+      return;
+    }
+    el.innerHTML = sales.slice(0, 6).map((s) => `
+      <div class="mini-list-item">
+        <span><strong>${s.size}</strong> · ${s.quantity} pcs</span>
+        <span>${formatCurrency(s.revenue)}</span>
+        <span class="meta">${formatDate(s.date)}</span>
+      </div>
+    `).join("");
+  }
+
+  function last14Days() {
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d.toISOString().slice(0, 10));
+    }
+    return days;
+  }
+
+  function last6Months() {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString("en-MY", { month: "short" }) });
+    }
+    return months;
+  }
+
+  function renderCharts() {
+    const days = last14Days();
+    const dailyTotals = days.map((day) =>
+      sales.filter((s) => s.date === day).reduce((sum, s) => sum + s.revenue, 0)
+    );
+    const dailyLabels = days.map((d) => new Date(d).toLocaleDateString("en-MY", { day: "2-digit", month: "short" }));
+
+    const months = last6Months();
+    const monthlyTotals = months.map(({ key }) =>
+      sales.filter((s) => {
+        const d = new Date(s.date);
+        return `${d.getFullYear()}-${d.getMonth()}` === key;
+      }).reduce((sum, s) => sum + s.revenue, 0)
+    );
+
+    const chartFont = { family: "Poppins", size: 11 };
+
+    if (dailyChart) dailyChart.destroy();
+    dailyChart = new Chart(document.getElementById("dailyChart"), {
+      type: "line",
+      data: {
+        labels: dailyLabels,
+        datasets: [{
+          label: "Revenue (RM)",
+          data: dailyTotals,
+          borderColor: "#d4622a",
+          backgroundColor: "rgba(212,98,42,0.12)",
+          fill: true,
+          tension: 0.35,
+          pointRadius: 2,
+        }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: chartFont }, grid: { display: false } },
+          y: { ticks: { font: chartFont }, grid: { color: "rgba(17,17,17,0.06)" } },
+        },
+      },
+    });
+
+    if (monthlyChart) monthlyChart.destroy();
+    monthlyChart = new Chart(document.getElementById("monthlyChart"), {
+      type: "bar",
+      data: {
+        labels: months.map((m) => m.label),
+        datasets: [{
+          label: "Revenue (RM)",
+          data: monthlyTotals,
+          backgroundColor: "#111111",
+          borderRadius: 4,
+          maxBarThickness: 34,
+        }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: chartFont }, grid: { display: false } },
+          y: { ticks: { font: chartFont }, grid: { color: "rgba(17,17,17,0.06)" } },
+        },
+      },
+    });
+  }
+
+  function renderAll() {
+    renderStats();
+    renderStockBySize();
+    renderRecentSales();
+    renderCharts();
+  }
+
+  watchProduct((p) => { product = p; renderAll(); });
+  watchSales((s) => { sales = s; renderAll(); });
+</script>
+
+</body>
+</html>

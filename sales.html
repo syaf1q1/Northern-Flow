@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sales · Northern Flow</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="nav-scrim" id="navScrim"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark"><img src="logo.png" alt="Northern Flow" onerror="this.remove(); this.parentElement.textContent='NF';" /></div>
+      <div class="name">Northern Flow</div>
+      <div class="tagline">Inventory &amp; Sales</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html" data-nav="dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a href="inventory.html" data-nav="inventory">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        Inventory
+      </a>
+      <a href="sales.html" data-nav="sales">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.58 9.59a2 2 0 002.83 0l4.59-4.59a2 2 0 000-2.83z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+        Sales
+      </a>
+      <a href="report.html" data-nav="report">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+        Report
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <button data-logout type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        Log Out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="flex gap-12" style="align-items:center;">
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div>
+          <div class="page-title">Sales</div>
+          <div class="page-sub">Record a sale and review sales history</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="grid-2">
+
+        <!-- Sales history -->
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Sales History</h2>
+          </div>
+          <div class="panel-body table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Size</th>
+                  <th>Quantity</th>
+                  <th>Shipping</th>
+                  <th>Revenue</th>
+                  <th>Profit</th>
+                </tr>
+              </thead>
+              <tbody id="salesRows">
+                <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Record new sale -->
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Record New Sale</h2>
+          </div>
+          <div class="panel-body table-wrap">
+            <div class="scroll-x-inner" style="min-width:360px;">
+              <div id="noProductNote" class="form-note" style="display:none;">
+                No product set up yet. Add your product on the Inventory page first.
+              </div>
+              <div id="incompleteProductNote" class="form-note" style="display:none; color:var(--danger);">
+                Your product is missing pricing details (name, cost, or selling price). Go to Inventory → Edit and fill them in before recording sales, otherwise revenue and profit will be recorded as RM 0.00.
+              </div>
+              <form id="saleForm">
+                <div class="field">
+                  <label for="saleSize">Size</label>
+                  <select id="saleSize" required></select>
+                  <div class="form-note" id="saleStockNote"></div>
+                </div>
+                <div class="field">
+                  <label for="saleQty">Quantity</label>
+                  <input type="number" id="saleQty" min="1" step="1" value="1" required />
+                </div>
+
+                <div class="field-row-2col">
+                  <div class="field">
+                    <label for="saleShippingCharged">Shipping Charged to Customer (RM)</label>
+                    <input type="number" id="saleShippingCharged" min="0" step="0.01" value="0" />
+                  </div>
+                  <div class="field">
+                    <label for="saleShippingCost">Shipping Cost / Courier Fee (RM)</label>
+                    <input type="number" id="saleShippingCost" min="0" step="0.01" value="0" />
+                  </div>
+                </div>
+                <div class="form-note" style="margin-top:-6px;">
+                  Shipping prices vary by courier/zone — enter the actual amount for this sale. Charged is what the customer pays you; Cost is what you pay the courier.
+                </div>
+
+                <div class="total-preview">
+                  <span class="label">Total Revenue</span>
+                  <span class="value" id="saleTotal">RM 0.00</span>
+                </div>
+
+                <button type="submit" class="btn btn-accent w-full" id="saleSubmitBtn">Save Transaction</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="index.html" data-nav="dashboard">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Home
+    </a>
+    <a href="inventory.html" data-nav="inventory">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+      Stock
+    </a>
+    <a href="sales.html" data-nav="sales">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L3 3v6.59a2 2 0 00.59 1.41l9.58 9.59a2 2 0 002.83 0l4.59-4.59a2 2 0 000-2.83z"/></svg>
+      Sales
+    </a>
+    <a href="report.html" data-nav="report">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+      Report
+    </a>
+  </div>
+</nav>
+
+<script type="module">
+  import { guardAuth, initNav, formatCurrency, formatDate, toast } from "./app.js";
+  import { watchProduct, watchSales, recordSale, SIZES } from "./firebase.js";
+
+  await guardAuth();
+  initNav("sales");
+
+  let product = null;
+  let sales = [];
+
+  const saleSize = document.getElementById("saleSize");
+  const saleQty = document.getElementById("saleQty");
+  const saleShippingCharged = document.getElementById("saleShippingCharged");
+  const saleShippingCost = document.getElementById("saleShippingCost");
+  const saleTotal = document.getElementById("saleTotal");
+  const saleStockNote = document.getElementById("saleStockNote");
+  const saleSubmitBtn = document.getElementById("saleSubmitBtn");
+  const noProductNote = document.getElementById("noProductNote");
+  const incompleteProductNote = document.getElementById("incompleteProductNote");
+
+  function productIsComplete(p) {
+    return !!(p && p.name && p.sellingPrice != null && p.costPrice != null);
+  }
+
+  function refreshSizeOptions() {
+    if (!product) {
+      saleSize.innerHTML = "";
+      noProductNote.style.display = "block";
+      incompleteProductNote.style.display = "none";
+      saleSubmitBtn.disabled = true;
+      return;
+    }
+    noProductNote.style.display = "none";
+    incompleteProductNote.style.display = productIsComplete(product) ? "none" : "block";
+    saleSubmitBtn.disabled = false;
+    const prevValue = saleSize.value;
+    saleSize.innerHTML = SIZES.map((s) => {
+      const stock = product.sizes?.[s]?.stock ?? 0;
+      return `<option value="${s}" ${stock <= 0 ? "disabled" : ""}>${s} — ${stock} in stock${stock <= 0 ? " (out)" : ""}</option>`;
+    }).join("");
+    if (SIZES.includes(prevValue)) saleSize.value = prevValue;
+    updatePreview();
+  }
+
+  function currentStock() {
+    if (!product) return 0;
+    return product.sizes?.[saleSize.value]?.stock ?? 0;
+  }
+
+  function updatePreview() {
+    if (!product) return;
+    const qty = parseInt(saleQty.value, 10) || 0;
+    const stock = currentStock();
+    saleQty.max = stock;
+    saleStockNote.textContent = `${stock} pcs available in size ${saleSize.value}.`;
+    const shippingCharged = parseFloat(saleShippingCharged.value) || 0;
+    const total = (product.sellingPrice ?? 0) * qty + shippingCharged;
+    saleTotal.textContent = formatCurrency(total);
+    saleSubmitBtn.disabled = qty < 1 || qty > stock;
+  }
+
+  saleSize.addEventListener("change", updatePreview);
+  saleQty.addEventListener("input", updatePreview);
+  saleShippingCharged.addEventListener("input", updatePreview);
+
+  document.getElementById("saleForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!product) return;
+    const size = saleSize.value;
+    const quantity = parseInt(saleQty.value, 10);
+    const stock = currentStock();
+
+    if (!quantity || quantity < 1) return;
+    if (quantity > stock) {
+      toast(`Only ${stock} pcs of size ${size} left in stock.`, "danger");
+      return;
+    }
+
+    saleSubmitBtn.disabled = true;
+    saleSubmitBtn.textContent = "Saving…";
+    try {
+      await recordSale({
+        size,
+        quantity,
+        sellingPrice: product.sellingPrice,
+        costPrice: product.costPrice,
+        productName: product.name,
+        shippingCharged: parseFloat(saleShippingCharged.value) || 0,
+        shippingCost: parseFloat(saleShippingCost.value) || 0,
+      });
+      toast(`Sale recorded: ${quantity} pcs of size ${size}.`, "success");
+      saleQty.value = 1;
+      saleShippingCharged.value = 0;
+      saleShippingCost.value = 0;
+    } catch (err) {
+      toast(`Couldn't save the sale: ${err.message}`, "danger");
+    } finally {
+      saleSubmitBtn.textContent = "Save Transaction";
+      updatePreview();
+    }
+  });
+
+  function renderSalesHistory() {
+    const rows = document.getElementById("salesRows");
+    if (!sales.length) {
+      rows.innerHTML = `<tr class="empty-row"><td colspan="6">No sales recorded yet.</td></tr>`;
+      return;
+    }
+    rows.innerHTML = sales.map((s) => `
+      <tr>
+        <td>${formatDate(s.date)}</td>
+        <td>${s.size}</td>
+        <td>${s.quantity}</td>
+        <td>${formatCurrency(s.shippingCharged ?? 0)}</td>
+        <td class="cell-strong">${formatCurrency(s.revenue)}</td>
+        <td>${formatCurrency(s.profit)}</td>
+      </tr>
+    `).join("");
+  }
+
+  watchProduct((p) => { product = p; refreshSizeOptions(); });
+  watchSales((s) => { sales = s; renderSalesHistory(); });
+</script>
+
+</body>
+</html>
